@@ -1,9 +1,12 @@
 <h2 align="center">
 InfiFPO: Implicit Model Fusion via Preference Optimization in Large Language Models
 </h2>
-<!-- <h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for the latest update.</h5> -->
-<!-- <h5 align=center>
-</h5> -->
+<h5 align=center>
+
+[![License](https://img.shields.io/badge/Code%20License-Apache2.0-yellow)](LICENSE)    
+
+</h5>
+
 
 ## 📣 News
 * **[2025/05/17]**  🚀 Source code released! We're now working on extending InfiFPO to more LLMs.
