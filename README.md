@@ -1,110 +1,107 @@
-<h2 align="center">
-InfiFPO: Implicit Model Fusion via Preference Optimization in Large Language Models
-</h2>
-<h5 align=center>
+<div align="center">
+  <img src="assets/icon.png" style="max-width: 20%; margin: 20px 0;">
+</div>
+<div align="center">
 
-[![License](https://img.shields.io/badge/Code%20License-Apache2.0-yellow)](LICENSE)    
+<!-- 快速链接区域 -->
 
-</h5>
+<div align="center" style="margin: 20px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+  <a href="https://arxiv.org/abs/2505.13878" style="padding: 8px 15px; background-color: #B22222; color: white; border-radius: 5px; text-decoration: none;">📚 Paper</a>
+  <a href="https://github.com/InfiXAI/InfiFPO" style="padding: 8px 15px; background-color: #24292e; color: white; border-radius: 5px; text-decoration: none;">💻 Code</a>
+  <a href="https://huggingface.co/InfiX-ai/InfiFPO-14B" style="padding: 8px 15px; background-color: #FFD700; color: black; border-radius: 5px; text-decoration: none;">🤗 Model</a>
+</div>
 
+# *InfiFPO*: Implicit Model Fusion via Preference Optimization in Large Language Models
 
-## 📣 News
-* **[2025/05/17]**  🚀 Source code released! We're now working on extending InfiFPO to more LLMs.
+**Yanggan Gu**¹², **Yuanyi Wang**¹, **Zhaoyi Yan**², **Yiming Zhang**¹, **Qi Zhou**¹, **Fei Wu**³, **Hongxia Yang**¹²
 
-## 🎯 Overview
-We propose **InfiFPO**, a principled and efficient framework for performing model fusion during the preference alignment phase. Our key insight is that the reference model in preference optimization (e.g., in DPO) can be replaced with a fused source model, thereby enabling the pivot model to learn not only from preference data but also from the probabilistic behaviors of multiple source models.
+¹The Hong Kong Polytechnic University, ²InfiX.ai, ³Zhejiang University
 
-![InfiFPO](assets/exp.png)
+</div>
 
-Comprehensive experiments on 11 widely-used benchmarks demonstrate that **InfiFPO** consistently outperforms existing model fusion and preference optimization methods. When using Phi-4 as the pivot model, **InfiFPO** improve its average performance from 79.95 to 83.33 on 11 benchmarks, significantly improving its capabilities in mathematics, coding, and reasoning tasks.
+> To appear at NeurIPS 2025 *Spotlight* !
 
-## 🕹️ Usage
+---
 
-### Installation
+## Abstract
 
-```
-git clone https://github.com/Reallm-Labs/InfiFPO.git
-cd InfiFPO
-conda create -n infifpo python==3.10
-conda activate infifpo
-pip install -r requirements.txt
-```
+Model fusion combines multiple Large Language Models (LLMs) with different strengths into a more powerful, integrated model through lightweight training methods. 
 
-### Training
+Existing works on model fusion focus primarily on supervised fine-tuning (SFT), leaving preference alignment (PA) --a critical phase for enhancing LLM performance--largely unexplored. The current few fusion methods on PA phase, like WRPO, simplify the process by utilizing only response outputs from source models while discarding their probability information. 
 
-Our training code is primarily based on the `dpo_trainer` from the [TRL library](https://github.com/huggingface/trl) by Hugging Face. Specifically, we reference the implementation in [dpo_trainer.py](https://github.com/huggingface/trl/blob/main/trl/trainer/dpo_trainer.py).
+To address this limitation, we propose *InfiFPO*, a preference optimization method for implicit model fusion. *InfiFPO* replaces the reference model in Direct Preference Optimization (DPO) with a fused source model that synthesizes multi-source probabilities at the sequence level, circumventing complex vocabulary alignment challenges in previous works and meanwhile maintaining the probability information. By introducing probability clipping and max-margin fusion strategies, *InfiFPO* enables the pivot model to align with human preferences while effectively distilling knowledge from source models. 
 
-- Check the `run.sh` file
-- If you're using a SLURM cluster, check the `run-slurm.sh` file instead
+Comprehensive experiments on 11 widely-used benchmarks demonstrate that *InfiFPO* consistently outperforms existing model fusion and preference optimization methods. When using Phi-4 as the pivot model, *InfiFPO* improve its average performance from **79.95 to 83.33** on **11 benchmarks**, significantly improving its capabilities in mathematics, coding, and reasoning tasks.
 
+---
 
-## Supported Dataset Format
+## *InfiFPO*: A Paradigm Shift in Model Fusion
 
-InfiFPO now supports datasets with the following structure and fields:
+Our solution, *InfiFPO*, introduces three key breakthroughs:
 
-- **`chosen`**: The preferred response
-- **`rejected`**: The non-preferred response
+![InfiFPO Overview](assets/infiFPO.jpg)
 
-### Pre-calculated Log Probabilities
+### **Ⅰ. Implicit Model Fusion**🎯
 
-#### Pivot Model Metrics
-- **`ref_chosen_logps`**: Log probabilities of the `chosen` response calculated by the pivot model
-- **`ref_rejected_logps`**: Log probabilities of the `rejected` response calculated by the pivot model
-- **`ref_mean_chosen_logps`**: Mean log probabilities of the `chosen` response calculated by the pivot model
-- **`ref_mean_rejected_logps`**: Mean log probabilities of the `rejected` response calculated by the pivot model
+Instead of wrestling with complex vocabulary alignment at the token level, we operate at the **sequence level**, seamlessly integrating probabilities from multiple source models. This elegant approach preserves crucial probability information while avoiding compatibility headaches.
 
-#### Source Model Metrics
-- **`fuse_chosen_logps`**: Log probabilities of the `chosen` response calculated by the source model
-- **`fuse_rejected_logps`**: Log probabilities of the `rejected` response calculated by the source model
-- **`fuse_mean_chosen_logps`**: Mean log probabilities of the `chosen` response calculated by the source model
-- **`fuse_mean_rejected_logps`**: Mean log probabilities of the `rejected` response calculated by the source model
+### **Ⅱ. Three Pillars of Stability** 🔧
 
+- **Length Normalization**
+  
+  - Eliminates bias from varying tokenization patterns across models
+  - Ensures fair comparison of sequence probabilities regardless of token length
 
-### Example
-```
-    {
-        "chosen": [
-            {
-                "role": "user",
-                "content": "A batch of barley seeds had the following germination test results under the same conditions:\n\n| Number of Seeds | $50$ | $100$ | $300$ | $400$ | $600$ | $1000$ |\n|-----------------|------|-------|-------|-------|-------|--------|\n| Germination Frequency | $47$ | $96$ | $284$ | $380$ | $571$ | $948$ |\n\nEstimate the probability of germination for this batch of barley seeds. (Round the result to $0.01$)"
-            },
-            {
-                "role": "assistant",
-                "content": "To estimate the probability of germination for the batch of barley seeds, we need to calculate the overall germination rate across all the samples. This involves finding the total number of seeds that germinated and dividing it by the total number of seeds tested.\n\nFirst, we calculate the total number of seeds:\n\n\\[\n50 + 100 + 300 + 400 + 600 + 1000 = 2450\n\\]\n\nNext, we calculate the total number of seeds that germinated:\n\n\\[\n47 + 96 + 284 + 380 + 571 + 948 = 2326\n\\]\n\nNow, we find the probability of germination by dividing the total number of germinated seeds by the total number of seeds:\n\n\\[\n\\text{Probability of germination} = \\frac{2326}{2450}\n\\]\n\nPerform the division:\n\n\\[\n\\frac{2326}{2450} \\approx 0.9493877551\n\\]\n\nRounding this to two decimal places gives:\n\n\\[\n0.95\n\\]\n\nThus, the estimated probability of germination for this batch of barley seeds is \\(\\boxed{0.95}\\)."
-            }
-        ],
-        "rejected": [
-            {
-                "role": "user",
-                "content": "A batch of barley seeds had the following germination test results under the same conditions:\n\n| Number of Seeds | $50$ | $100$ | $300$ | $400$ | $600$ | $1000$ |\n|-----------------|------|-------|-------|-------|-------|--------|\n| Germination Frequency | $47$ | $96$ | $284$ | $380$ | $571$ | $948$ |\n\nEstimate the probability of germination for this batch of barley seeds. (Round the result to $0.01$)"
-            },
-            {
-                "role": "assistant",
-                "content": "To estimate the probability of germination for the batch of barley seeds, we need to calculate the overall germination rate based on the given data. The germination rate is the ratio of the total number of seeds that germinated to the total number of seeds tested.\n\nFirst, let's calculate the total number of seeds tested:\n\n\\[\n50 + 100 + 300 + 400 + 600 + 1000 = 2450\n\\]\n\nNext, let's calculate the total number of seeds that germinated:\n\n\\[\n47 + 96 + 284 + 380 + 571 + 948 = 2326\n\\]\n\nNow, we can calculate the probability of germination by dividing the total number of seeds that germinated by the total number of seeds tested:\n\n\\[\n\\text{Probability of germination} = \\frac{2326}{2450}\n\\]\n\nPerform the division:\n\n\\[\n\\frac{2326}{2450} \\approx 0.9481632653\n\\]\n\nRounding this result to two decimal places gives:\n\n\\[\n0.95\n\\]\n\nTherefore, the estimated probability of germination for this batch of barley seeds is \\( \\boxed{0.95} \\)."
-            }
-        ],
-        "ref_chosen_logps": -16.809629440307617,
-        "ref_mean_chosen_logps": -0.06974949687719345,
-        "ref_rejected_logps": -35.141197204589844,
-        "ref_mean_rejected_logps": -0.13944919407367706,
-        "fuse_chosen_logps": [
-            -67.31946563720703,
-            -74.1878662109375,
-            -104.12448120117188
-        ],
-        "fuse_mean_chosen_logps": [
-            -0.2378779649734497,
-            -0.2621479332447052,
-            -0.3679310381412506
-        ],
-        "fuse_rejected_logps": [
-            -75.14492797851562,
-            -78.72958374023438,
-            -99.033447265625
-        ],
-        "fuse_mean_rejected_logps": [
-            -0.25559499859809875,
-            -0.2677876949310303,
-            -0.3368484675884247
-        ]
+- **Probability Clipping**
+  
+  - Prevents underperforming source models from introducing noise
+  - Maintains training stability by setting intelligent probability boundaries
+
+- **Max-Margin Fusion**
+  
+  - Automatically identifies the most informative source model for each scenario
+  - Focuses on learning distinctive, complementary knowledge
+
+### **Ⅲ. Efficient Training Pipeline** ⚡
+
+By transforming the complex reinforcement learning problem into an efficient offline optimization objective, InfiFPO achieves remarkable results without the computational overhead of traditional methods.
+
+---
+
+## Impressive Results Across the Board
+
+Our comprehensive evaluation across **11 diverse benchmarks** demonstrates *InfiFPO*'s consistent superiority:
+
+| Capability Area | Before *InfiFPO* | After *InfiFPO* | Improvement |
+| --------------- | ---------------- | --------------- | ----------- |
+| **Mathematics** | 72.85            | 75.80           | **+2.95**   |
+| **Coding**      | 79.47            | 85.15           | **+5.68**   |
+| **Overall**     | 79.95            | 83.33           | **+3.38**   |
+
+---
+
+## Beyond the Numbers: Technical Foundation
+
+*InfiFPO*'s beauty lies in its mathematical foundation. By replacing the reference model in Direct Preference Optimization with a carefully fused source model, we create an optimization objective that simultaneously:
+
+- Aligns with human preferences
+- Distills knowledge from multiple expert models
+- Maintains training stability and efficiency
+
+The extra gradient analysis reveals how *InfiFPO* weights training samples based on the divergence between source and pivot model preferences, focusing optimization efforts where they matter most.
+
+---
+
+## BibTeX
+
+```bibtex
+@misc{gu-2025-infifpo,
+      title={InfiFPO: Implicit Model Fusion via Preference Optimization in Large Language Models}, 
+      author={Yanggan Gu and Zhaoyi Yan and Yuanyi Wang and Yiming Zhang and Qi Zhou and Fei Wu and Hongxia Yang},
+      year={2025},
+      eprint={2505.13878},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2505.13878}, 
+}
 ```
