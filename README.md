@@ -13,7 +13,7 @@
 
 # *InfiFPO*: Implicit Model Fusion via Preference Optimization in Large Language Models
 
-**Yanggan Gu**¹², **Zhaoyi Yan**², **Yuanyi Wang**¹,**Yiming Zhang**¹, **Qi Zhou**¹, **Fei Wu**³, **Hongxia Yang**¹²
+**Yanggan Gu**¹², **Yuanyi Wang**¹, **Zhaoyi Yan**², **Yiming Zhang**¹, **Qi Zhou**¹, **Fei Wu**³, **Hongxia Yang**¹²
 
 ¹The Hong Kong Polytechnic University, ²InfiX.ai, ³Zhejiang University
 
