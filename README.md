@@ -97,7 +97,7 @@ The extra gradient analysis reveals how *InfiFPO* weights training samples based
 ```bibtex
 @misc{gu-2025-infifpo,
       title={InfiFPO: Implicit Model Fusion via Preference Optimization in Large Language Models}, 
-      author={Yanggan Gu and Zhaoyi Yan and Yuanyi Wang and Yiming Zhang and Qi Zhou and Fei Wu and Hongxia Yang},
+      author={Yanggan Gu and Yuanyi Wang and Zhaoyi Yan and Yiming Zhang and Qi Zhou and Fei Wu and Hongxia Yang},
       year={2025},
       eprint={2505.13878},
       archivePrefix={arXiv},
